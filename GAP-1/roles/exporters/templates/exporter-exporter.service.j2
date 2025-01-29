@@ -1,0 +1,12 @@
+[Unit]
+Description=Exporter Exporter
+After=network.target
+
+[Service]
+User=exporter-exporter
+Group=exporter-exporter
+Type=simple
+ExecStart=/usr/local/bin/exporter_exporter -config.file /etc/exporter-exporter.yml
+
+[Install]
+WantedBy=multi-user.target

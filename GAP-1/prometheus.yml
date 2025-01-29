@@ -1,0 +1,6 @@
+---
+- name: Install exporters to target nodes
+  hosts: prometheus-servers
+  become: true
+  roles:
+    - prometheus

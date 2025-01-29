@@ -1,0 +1,29 @@
+- name: Download mysql exporter
+  unarchive:
+    src: https://github.com/prometheus/mysqld_exporter/releases/download/v0.16.0/mysqld_exporter-0.16.0.linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--strip-components=1', '--show-stored-names']
+    mode: '755'
+
+- name: Create mysql exporter user
+  user:
+    name: mysql-exporter
+    shell: /bin/false
+    system: true
+
+- name: Render mysql exporter config file
+  template:
+    src: mysql-exporter.conf.j2
+    dest: /etc/mysql-exporter.conf
+    mode: '600'
+    owner: mysql-exporter
+    group: mysql-exporter
+
+- name: Set up mysql exporter service
+  template:
+    src: mysql-exporter.service.j2
+    dest: /etc/systemd/system/mysql-exporter.service
+  notify:
+    - Start mysql exporter
+    
