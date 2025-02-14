@@ -1,0 +1,23 @@
+- name: Download php-fpm exporter
+  unarchive:
+    src: https://github.com/hipages/php-fpm_exporter/releases/download/v2.2.0/php-fpm_exporter_2.2.0_linux_amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--show-stored-names']
+    include:
+      - 'php-fpm_exporter'
+    mode: '755'
+
+- name: Create php-fpm exporter user
+  user:
+    name: php-fpm-exporter
+    shell: /bin/false
+    system: true
+
+- name: Set up php-fpm exporter service
+  template:
+    src: php-fpm-exporter.service.j2
+    dest: /etc/systemd/system/php-fpm-exporter.service
+  notify:
+    - Start php-fpm exporter
+    
