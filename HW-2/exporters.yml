@@ -1,0 +1,6 @@
+---
+- name: Install exporters to target nodes
+  hosts: exporter-hosts
+  become: true
+  roles:
+    - exporters
