@@ -1,0 +1,25 @@
+---
+# tasks file for exporters
+- name: Install node exporter
+  include_tasks:
+    file: node-exporter.yml
+
+- name: Install nginx exporter
+  include_tasks:
+    file: nginx-exporter.yml
+
+- name: Install php-fpm exporter
+  include_tasks:
+    file: php-fpm-exporter.yml
+
+- name: Install blackbox exporter
+  include_tasks:
+    file: blackbox-exporter.yml
+
+- name: Install mysql exporter
+  include_tasks:
+    file: mysql-exporter.yml
+
+- name: Install exporter exporter
+  include_tasks:
+    file: exporter-exporter.yml

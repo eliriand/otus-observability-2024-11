@@ -1,0 +1,33 @@
+---
+- name: Create vm system user
+  user:
+    name: vm
+    shell: /bin/false
+    system: true
+
+- name: Download vm package
+  unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.111.0/victoria-metrics-linux-amd64-v1.111.0.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--show-stored-names']
+    mode: '755'
+    owner: vm
+    group: vm
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: vm
+    group: vm
+  loop:
+    - '/run/victoriametrics'
+    - '/var/lib/victoriametrics'
+
+- name: Set up node vm service
+  template:
+    src: vm.service.j2
+    dest: /etc/systemd/system/vm.service
+  notify:
+    - Start vm service

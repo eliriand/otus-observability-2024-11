@@ -1,0 +1,29 @@
+- name: Download nginx exporter
+  unarchive:
+    src: https://github.com/nginx/nginx-prometheus-exporter/releases/download/v1.4.1/nginx-prometheus-exporter_1.4.1_linux_amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--show-stored-names']
+    include:
+      - 'nginx-prometheus-exporter'
+    mode: '755'
+
+- name: Create nginx exporter user
+  user:
+    name: nginx-exporter
+    shell: /bin/false
+    system: true
+
+- name: Set up nginx exporter service
+  template:
+    src: nginx-exporter.service.j2
+    dest: /etc/systemd/system/nginx-exporter.service
+  notify:
+    - Start nginx exporter
+
+- name: Set up nginx exporter socket
+  template:
+    src: nginx-exporter.socket.j2
+    dest: /etc/systemd/system/nginx-exporter.socket
+  notify:
+    - Start nginx exporter
