@@ -1,0 +1,27 @@
+defaultModule: node
+modules:
+  node:
+    method: http
+    http:
+       port: 9100
+  nginx:
+    method: http
+    http:
+       port: 9113
+  php-fpm:
+    method: http
+    http:
+       port: 9253
+  mysql:
+    method: http
+    http:
+       port: 9104
+  blackbox-stats:
+    method: http
+    http:
+       port: 9115
+  blackbox-probe:
+    method: http
+    http:
+      port: 9115
+      path: '/probe'

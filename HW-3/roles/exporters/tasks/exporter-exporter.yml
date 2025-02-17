@@ -1,0 +1,29 @@
+- name: Download exporter exporter
+  unarchive:
+    src: https://github.com/QubitProducts/exporter_exporter/releases/download/v0.5.0/exporter_exporter-0.5.0.linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--strip-components=1', '--show-stored-names']
+    mode: '755'
+
+- name: Create exporter exporter user
+  user:
+    name: exporter-exporter
+    shell: /bin/false
+    system: true
+
+- name: Render exporter exporter config file
+  template:
+    src: exporter-exporter.yml.j2
+    dest: /etc/exporter-exporter.yml
+    mode: '600'
+    owner: exporter-exporter
+    group: exporter-exporter
+
+- name: Set up exporter exporter service
+  template:
+    src: exporter-exporter.service.j2
+    dest: /etc/systemd/system/exporter-exporter.service
+  notify:
+    - Start exporter exporter
+    

@@ -1,0 +1,53 @@
+---
+- name: Create prometheus system user
+  user:
+    name: prometheus
+    shell: /bin/false
+    system: true
+
+- name: Download prometheus package
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v3.1.0/prometheus-3.1.0.linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    extra_opts: ['--strip-components=1', '--show-stored-names']
+    mode: '755'
+    owner: prometheus
+    group: prometheus
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  loop:
+    - '/etc/prometheus'
+    - '/var/lib/prometheus'
+
+- name: Render config file
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: '600'
+  notify:
+    - Start prometheus service
+
+- name: Render rules config file
+  template:
+    src: rules.yml.j2
+    dest: /etc/prometheus/rules.yml
+    owner: prometheus
+    group: prometheus
+    mode: '600'
+  notify:
+    - Start prometheus service
+
+- name: Set up node exporter service
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+  notify:
+    - Start prometheus service

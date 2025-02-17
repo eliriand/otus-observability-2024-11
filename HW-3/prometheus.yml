@@ -1,0 +1,8 @@
+---
+- name: Install prom and vm to target nodes
+  hosts: prometheus-servers
+  become: true
+  roles:
+    - vm
+    - alertmanager
+    - prometheus
