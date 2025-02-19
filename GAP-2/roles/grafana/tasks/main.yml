@@ -1,0 +1,88 @@
+---
+- name: Create grafana system user
+  user:
+    name: grafana
+    shell: /bin/false
+    system: true
+
+- name: Download grafana package
+  unarchive:
+    src: https://dl.grafana.com/oss/release/grafana-11.5.1.linux-amd64.tar.gz
+    dest: /opt
+    remote_src: yes
+    extra_opts: ['--show-stored-names']
+    mode: '755'
+    owner: grafana
+    group: grafana
+
+- name: Create symlink to grafana folder
+  file:
+    src: "/opt/grafana-v11.5.1"
+    dest: "/opt/grafana"
+    state: link
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: grafana
+    group: grafana
+  loop:
+    - '/opt/grafana-dashboards'
+    - '/opt/grafana-dashboards/app'
+    - '/opt/grafana-dashboards/infra'
+
+- name: Render app dashboard
+  copy:
+    src: app-metrics.json
+    dest: /opt/grafana-dashboards/app/app-metrics.json
+    owner: grafana
+    group: grafana
+    mode: '600'
+  notify:
+    - Start grafana service
+
+- name: Render app dashboard
+  copy:
+    src: node-exporter.json
+    dest: /opt/grafana-dashboards/infra/node-exporter.json
+    owner: grafana
+    group: grafana
+    mode: '600'
+  notify:
+    - Start grafana service
+
+- name: Set default password
+  replace:
+    path: /opt/grafana/conf/defaults.ini
+    regexp: '^(admin_password =).*$'
+    replace: '\g<1> {{ grafana_admin_pw }}'
+  notify:
+    - Start grafana service
+
+- name: Render datasource provisioner
+  template:
+    src: prom.yaml.j2
+    dest: /opt/grafana/conf/provisioning/datasources/prom.yaml
+    owner: grafana
+    group: grafana
+    mode: '600'
+  notify:
+    - Start grafana service
+
+- name: Render dashboard provisioner
+  template:
+    src: dashboards.yaml.j2
+    dest: /opt/grafana/conf/provisioning/dashboards/dashboards.yaml
+    owner: grafana
+    group: grafana
+    mode: '600'
+  notify:
+    - Start grafana service
+
+- name: Set up grafana service
+  template:
+    src: grafana.service.j2
+    dest: /etc/systemd/system/grafana.service
+  notify:
+    - Start grafana service

@@ -1,0 +1,10 @@
+[Unit]
+Description=NGINX Prometheus Exporter
+Requires=nginx-exporter.socket
+
+[Service]
+User=nginx-exporter
+ExecStart=/usr/local/bin/nginx-prometheus-exporter --nginx.scrape-uri=unix:/var/run/nginx-status.sock:/nginx_status --web.systemd-socket
+
+[Install]
+WantedBy=multi-user.target

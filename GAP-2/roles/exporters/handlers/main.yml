@@ -1,0 +1,44 @@
+---
+# handlers file for exporters
+- name: Start nginx exporter
+  systemd_service:
+    name: nginx-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
+
+
+- name: Start node exporter
+  systemd_service:
+    name: node-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
+
+- name: Start php-fpm exporter
+  systemd_service:
+    name: php-fpm-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
+
+- name: Start blackbox exporter
+  systemd_service:
+    name: blackbox-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
+
+- name: Start mysql exporter
+  systemd_service:
+    name: mysql-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
+
+- name: Start exporter exporter
+  systemd_service:
+    name: exporter-exporter
+    state: restarted
+    enabled: true
+    daemon-reload: true
