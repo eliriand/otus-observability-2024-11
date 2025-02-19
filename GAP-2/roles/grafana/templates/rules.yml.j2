@@ -1,0 +1,18 @@
+groups:
+  - name: web-checks
+    rules:
+      - alert: HTTP code is not 200
+        expr: probe_http_status_code{job="blackbox"} != 200
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP response code is not 200!"
+  - name: database
+    rules:
+      - alert: MySQL uptime is less then 2m
+        expr: mysql_global_status_uptime < 120
+        labels:
+          severity: warning
+        annotations:
+          summary: "MySQL uptime is less then 2m, probably service was restarted"

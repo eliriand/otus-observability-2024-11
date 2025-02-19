@@ -1,0 +1,8 @@
+---
+# handlers file for prometheus
+- name: Start grafana service
+  systemd_service:
+    name: grafana
+    state: restarted
+    enabled: true
+    daemon-reload: true

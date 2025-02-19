@@ -1,0 +1,12 @@
+[Unit]
+Description=Mysql Exporter
+After=network.target
+
+[Service]
+User=mysql-exporter
+Group=mysql-exporter
+Type=simple
+ExecStart=/usr/local/bin/mysqld_exporter --config.my-cnf="/etc/mysql-exporter.conf"
+
+[Install]
+WantedBy=multi-user.target
