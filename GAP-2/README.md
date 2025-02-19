@@ -47,6 +47,20 @@ Exporter exporter - проксирование прочих экспортеро
 Все подключения к экспортерам выполняются через проксирующий Exporter exporter по порту 9999
 
 Для выбора целевого экспортера на наблюдаемой машине используется параметр module
+
+## Grafana
+Настроена на хосте 10.0.0.6 (публичный адрес http://213.171.28.17:3000)
+
+Смотрит на prometheus в качестве датасорса, включает в себя папки infra и app. В папке infra присутствует импортированный шаблон для Node Exporter. В папке app присутствует шаблон App Stats с хелсчеками основных сервисов и парой метрик по nginx и mysql.
+
+Графана полностью разворачивается и настраивается при помощи ansible-роли (включая датасорсы и дашборды) при помощи механизма provisioning.
+
+<img width="384" alt="image" src="https://github.com/user-attachments/assets/45349aea-a08a-45b0-9119-92c6fac2ee3c" />
+<img width="1392" alt="image" src="https://github.com/user-attachments/assets/42279410-d067-41dd-8eb3-a52db562f2fd" />
+<img width="1573" alt="image" src="https://github.com/user-attachments/assets/c8efd8ea-0854-4069-aa21-370d58dbbd93" />
+
+
+
 ## Структура репозитория
 Две Ansible роли для установки экспортеров и настройки Prometheus: roles/exporters и roles/prometheus
 
@@ -59,6 +73,11 @@ Exporter exporter - проксирование прочих экспортеро
 Роль prometheus скачивает, устанавливает и конфигурирует сам Prometheus. Основной конфигурационный файл - roles/prometheus/templates/prometheus.yml.j2, в нем описано подключение ко всем настроенным ранее экспортерам, кроме того указана отправка метрик в запущенный на том же порту VM на порту 8428, при помощи external_labels дописываем метку site: prod.
 
 Для работы алертинга добавлен файл с правилами генерации алертов: roles/prometheus/templates/rules.yml.j2
+
+Роль grafana отвечает за установку, настройку и провиженинг grafana.
+Конфиг для подключения датасорса: roles/grafana/templates/prom.yaml.j2
+Конфиг для провиженинга дашбордов: roles/grafana/templates/dashboards.yaml.j2
+Сами json-ы с описаниями дашбордов: roles/grafana/files/*.json
 
 ## Запуск решения
 
