@@ -1,0 +1,9 @@
+[Unit]
+Description=Blackbox Prometheus Exporter
+
+[Service]
+User=blackbox-exporter
+ExecStart=/usr/local/bin/blackbox_exporter --config.file=/etc/blackbox.yml
+
+[Install]
+WantedBy=multi-user.target

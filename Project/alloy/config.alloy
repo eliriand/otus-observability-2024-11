@@ -1,0 +1,119 @@
+// Sample config for Alloy.
+//
+// For a full configuration reference, see https://grafana.com/docs/alloy
+logging {
+  level = "warn"
+}
+
+prometheus.exporter.unix "default" {
+  include_exporter_metrics = true
+  disable_collectors       = ["mdadm"]
+}
+
+prometheus.scrape "default" {
+  targets = array.concat(
+    prometheus.exporter.unix.default.targets,
+    [{
+      // Self-collect metrics
+      job         = "alloy",
+      __address__ = "127.0.0.1:12345",
+    }],
+  )
+
+  forward_to = [
+  // TODO: components to forward metrics to (like prometheus.remote_write or
+  // prometheus.relabel).
+  ]
+}
+
+local.file_match "nginx_logs" {
+     path_targets = [{"__path__" = "/var/log/nginx/*.log"}]
+     sync_period = "5s"
+}
+
+loki.source.file "nginx_logs_scrape" {
+    targets    = local.file_match.nginx_logs.targets
+    forward_to = [loki.process.nginx_logs_label.receiver]
+    tail_from_end = true
+}
+
+loki.process "nginx_logs_label" {
+    forward_to = [loki.write.grafana_loki.receiver]
+
+    stage.static_labels {
+      values = {
+        job  = "airsonic_nginx",
+        service_name = "nginx",
+      }
+    }
+}
+
+local.file_match "postgres_logs" {
+     path_targets = [{"__path__" = "/var/log/postgresql/*.log"}]
+     sync_period = "5s"
+}
+
+loki.source.file "postgres_logs_scrape" {
+    targets    = local.file_match.postgres_logs.targets
+    forward_to = [loki.process.postgres_logs_label.receiver]
+    tail_from_end = true
+}
+
+loki.process "postgres_logs_label" {
+    forward_to = [loki.write.grafana_loki.receiver]
+
+    stage.static_labels {
+      values = {
+        job  = "airsonic_postgres",
+        service_name = "postgresql",
+      }
+    }
+}
+
+local.file_match "airsonic_logs" {
+     path_targets = [{"__path__" = "/var/airsonic/airsonic.log"}]
+     sync_period = "5s"
+}
+
+loki.source.file "airsonic_logs_scrape" {
+    targets    = local.file_match.airsonic_logs.targets
+    forward_to = [loki.process.airsonic_logs_label.receiver]
+    tail_from_end = true
+}
+
+loki.process "airsonic_logs_label" {
+    forward_to = [loki.write.grafana_loki.receiver]
+
+    stage.static_labels {
+      values = {
+        job  = "airsonic_airsonic_app",
+        service_name = "airsonic",
+      }
+    }
+}
+
+
+loki.source.syslog "local" {
+  listener {
+    address  = "0.0.0.0:51893"
+    labels   = { component = "loki.source.syslog", protocol = "tcp" }
+  }
+
+  listener {
+    address  = "0.0.0.0:51898"
+    protocol = "udp"
+    labels   = { component = "loki.source.syslog", protocol = "udp"}
+  }
+
+  forward_to = [loki.write.grafana_loki.receiver]
+}
+
+
+
+loki.write "grafana_loki" {
+    endpoint {
+      url = "http://10.130.0.10:3100/loki/api/v1/push"
+    }
+  }
+
+
