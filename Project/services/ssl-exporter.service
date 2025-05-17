@@ -1,0 +1,9 @@
+[Unit]
+Description=SSL Prometheus Exporter
+
+[Service]
+User=ssl-exporter
+ExecStart=/usr/local/bin/ssl_exporter
+
+[Install]
+WantedBy=multi-user.target

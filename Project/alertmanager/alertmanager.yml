@@ -1,0 +1,28 @@
+global:
+  resolve_timeout: 5m
+
+receivers:
+  - name: blackbox
+  - name: tg-critical
+    telegram_configs:
+      - chat_id: -1002412406581
+        bot_token: "XXXXXXXXX"
+        api_url: "https://api.telegram.org"
+        send_resolved: true
+  - name: tg-warning
+    telegram_configs:
+      - chat_id: -1002265856078
+        bot_token: "XXXXXXXXX"
+        api_url: "https://api.telegram.org"
+        send_resolved: true  
+
+route:
+  group_by: ['alertname']
+  receiver: blackbox
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: tg-critical
+    - matchers:
+        - severity="warning"
+      receiver: tg-warning

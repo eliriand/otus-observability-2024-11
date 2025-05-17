@@ -1,0 +1,66 @@
+groups:
+  - name: postgresql-alerts
+    rules:
+      - alert: PostgresInstanceDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "PostgreSQL"
+        annotations:
+          summary: "Postgres server instance is down"
+          description: "Postgres has not been responding for the past 1 minutes on {{ $labels.instance }}"
+          title: "Postgres server instance {{ $labels.instance }} is down"
+      - alert: PostgresTooManyConnections
+        expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) > pg_settings_max_connections * 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql too many connections (instance {{ $labels.instance }} in cluster {{$labels.cluster_name}})
+          description: "PostgreSQL instance has too many connections\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}" 
+      - alert: DatabaseLowDiskAvailable
+        expr: (1.0 - node_filesystem_avail_bytes{mountpoint="/var/lib/postgresql",fstype!=""} / node_filesystem_size_bytes{mountpoint="/var/lib/postgresql",fstype!=""}) * 100 >= 80
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Database disk is filling up currently have less than 20% available on {{ $labels.instance }} in cluster {{$labels.cluster_name}})
+          description: "Database disk is filling up currently have less than 20%, currently occupied {{ $value }} %"
+  - name: nginx-alerts
+    rules:
+      - alert: NginxIsDown
+        expr: nginx_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: nginx
+        annotations:
+          summary: Nginx high HTTP 5xx error rate (instance {{ $labels.instance }})
+          description: "Nginx server instance {{ $labels.instance }} id down"
+  - name: http-checks
+    rules:
+      - alert: BlackboxProbeHttpFailure
+        expr: probe_http_status_code <= 199 OR probe_http_status_code >= 400
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Blackbox probe HTTP failure (instance {{ $labels.instance }})
+          description: "HTTP status code is not 200-399\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+      - alert: BlackboxSslCertificateExpired
+        expr: round((last_over_time(probe_ssl_earliest_cert_expiry[10m]) - time()) / 86400, 0.1) < 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Blackbox SSL certificate expired (instance {{ $labels.instance }})
+          description: "SSL certificate has expired already\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+      - alert: BlackboxSslCertificateWillExpireSoon
+        expr: round((last_over_time(probe_ssl_earliest_cert_expiry[10m]) - time()) / 86400, 0.1) < 20
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Blackbox SSL certificate will expire soon (instance {{ $labels.instance }})
+          description: "SSL certificate expires in less than 20 days\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
